@@ -12,7 +12,7 @@ module.exports.registerCaption = async (req, res, next) => {
 
   const isCaptionExist = await captionModel.findOne({ email });
   if (isCaptionExist) {
-    return res.status(400).json({ message: "Caption already exists" });
+    return res.status(200).json({ message: "Caption already exists" });
   }
   const hashedPassword = await captionModel.hashPassword(password);
 
@@ -28,7 +28,7 @@ module.exports.registerCaption = async (req, res, next) => {
   });
 
   const token = caption.generateAuthToken();
-  res.status(201).json({ caption });
+  res.status(201).json({ token, caption });
 };
 
 module.exports.loginCaption = async (req, res, next) => {
