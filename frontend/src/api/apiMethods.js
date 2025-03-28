@@ -5,12 +5,27 @@ export const endpoints = {
   loginUser: "/users/login",
   registerCaption: "/captions/register",
   loginCaption: "/captions/login",
+  getCoordinates: "/location/get-coordinates",
+  getDistanceTime: "/location/get-distance-time",
+  getFare: "rides/get-fare",
+  createRide: "rides/create",
 };
 
 // GET Request: Fetch data from an API endpoint
-export const fetchData = async (endpoint) => {
+export const fetchData = async (endpoint, token = null) => {
+  // console.log("--------", token);
   try {
-    const response = await axiosInstance.get(endpoint);
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    };
+
+    // Add Authorization header only if token exists
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await axiosInstance.get(endpoint, { headers });
     return {
       status: response.status,
       statusText: response.statusText,
@@ -23,12 +38,18 @@ export const fetchData = async (endpoint) => {
 };
 
 // POST Request: Send data to an API endpoint
-export const postData = async (endpoint, data) => {
+export const postData = async (endpoint, data, token = null) => {
   try {
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
     const response = await axiosInstance.post(endpoint, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
     });
     return {
       status: response.status,

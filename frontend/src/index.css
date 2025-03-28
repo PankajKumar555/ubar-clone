@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 .ubar-font {
   font-family: UberMove, UberMoveText, system-ui, "Helvetica Neue", Helvetica,

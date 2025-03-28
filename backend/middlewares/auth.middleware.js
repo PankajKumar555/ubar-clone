@@ -1,4 +1,5 @@
 const captionModel = require("../models/user.model");
+const userModel = require("../models/user.model");
 const blacklistTokenModel = require("../models/blacklistToken.model");
 const jwt = require("jsonwebtoken");
 
@@ -28,7 +29,7 @@ module.exports.authUser = async (req, res, next) => {
 
     // Verify JWT Token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const caption = await userModel.findById(decoded._id);
+    const user = await userModel.findById(decoded._id);
 
     if (!user) {
       return res.status(401).json({ message: "Unauthorized user" });

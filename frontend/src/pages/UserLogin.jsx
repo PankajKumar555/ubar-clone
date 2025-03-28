@@ -24,12 +24,14 @@ export const UserLogin = () => {
     try {
       const responce = await postData(endpoints.loginUser, formData);
       if (responce?.status === 200) {
+        // console.log("----", responce);
+        localStorage.setItem("token", responce?.data?.token);
         toast.success("Login successfully! 🎉");
-        // navigate("/login");
         setFormData({
           email: "",
           password: "",
         });
+        navigate("/home-user");
       }
     } catch (error) {
       if (error.response?.status === 400) {

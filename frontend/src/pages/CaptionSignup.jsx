@@ -38,7 +38,7 @@ export const CaptionSignup = () => {
         name in { color: 1, plate: 1, capacity: 1, vehicleType: 1 }
           ? {
               ...prev.vehicle,
-              [name]: value,
+              [name]: name === "vehicleType" ? value?.toLowerCase() : value,
             }
           : prev.vehicle,
       ...(name !== "firstName" &&
