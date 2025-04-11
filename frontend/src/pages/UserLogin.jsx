@@ -3,6 +3,7 @@ import NavbarHeader from "../components/NavbarHeader";
 import { useNavigate } from "react-router-dom";
 import { endpoints, postData } from "../api/apiMethods";
 import { toast } from "react-toastify";
+import SocketContext from "../context/SocketContext";
 
 export const UserLogin = () => {
   const [formData, setFormData] = React.useState({
@@ -10,6 +11,8 @@ export const UserLogin = () => {
     password: "",
   });
   const navigate = useNavigate();
+  const { socket } = React.useContext(SocketContext); // Get socket from context
+
   const handleNavigate = (path) => {
     navigate(`/${path}`);
   };
@@ -22,10 +25,20 @@ export const UserLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const responce = await postData(endpoints.loginUser, formData);
-      if (responce?.status === 200) {
-        // console.log("----", responce);
-        localStorage.setItem("token", responce?.data?.token);
+      const response = await postData(endpoints.loginUser, formData);
+      if (response?.status === 200) {
+        console.log("----", response);
+        localStorage.setItem("token", response?.data?.token);
+        localStorage.setItem("user", JSON.stringify(response?.data?.user)); // Store user data
+        // ✅ Send user details to the socket after login
+        if (socket) {
+          socket.emit("join", {
+            userId: response?.data?.user._id,
+            userType: "user",
+          });
+        } else {
+          console.error("Socket not available");
+        }
         toast.success("Login successfully! 🎉");
         setFormData({
           email: "",

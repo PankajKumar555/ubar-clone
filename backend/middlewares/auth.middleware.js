@@ -1,4 +1,4 @@
-const captionModel = require("../models/user.model");
+const captainModel = require("../models/caption.model");
 const userModel = require("../models/user.model");
 const blacklistTokenModel = require("../models/blacklistToken.model");
 const jwt = require("jsonwebtoken");
@@ -70,8 +70,8 @@ module.exports.authCaption = async (req, res, next) => {
 
     // Verify JWT Token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const caption = await captionModel.findById(decoded._id);
-    req.caption = caption;
+    const captain = await captainModel.findById(decoded._id);
+    req.captain = captain;
     return next();
   } catch (error) {
     return res

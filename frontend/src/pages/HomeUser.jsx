@@ -15,6 +15,7 @@ import NavbarUser from "../components/NavbarUser";
 import AdjustViewMap from "../components/AdjustViewMap";
 import RideSelection from "../components/RideSelection";
 import { endpoints, fetchData } from "../api/apiMethods";
+import SocketContext from "../context/SocketContext";
 
 const HomeUser = () => {
   const [pickup, setPickup] = useState("");
@@ -31,6 +32,19 @@ const HomeUser = () => {
   const [mapBounds, setMapBounds] = useState([]);
   const [timeAndDistance, setTimeAndDistance] = useState([]);
   const token = localStorage.getItem("token");
+  const { socket } = React.useContext(SocketContext); // Get socket from context
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser && socket) {
+      // console.log("Socket connected home page:", socket);
+      const user = JSON.parse(storedUser);
+      socket.emit("join", {
+        userId: user._id,
+        userType: "user",
+      });
+    }
+  }, [socket]);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -118,7 +132,7 @@ const HomeUser = () => {
         `${endpoints.getFare}?distance=${distance}&duration=${duration}`,
         token
       );
-      console.log("=======>>>>>>>>>>", responce);
+      // console.log("=======>>>>>>>>>>", responce);
       if (responce?.status == 200) {
         setTimeAndDistance(responce?.data);
       }

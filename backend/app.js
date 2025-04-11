@@ -25,4 +25,5 @@ app.use("/users", userRoutes);
 app.use("/captions", captionRoutes);
 app.use("/location", locationRoutes);
 app.use("/rides", rideRoute);
+
 module.exports = app;

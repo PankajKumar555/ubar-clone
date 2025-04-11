@@ -57,7 +57,7 @@ export const CaptionSignup = () => {
       const responce = await postData(endpoints.registerCaption, formData);
       if (responce?.status === 201) {
         toast.success("Account created successfully! 🎉");
-        navigate("/caption-login");
+        navigate("/captain-login");
         setFormData({
           fullname: {
             firstname: "",

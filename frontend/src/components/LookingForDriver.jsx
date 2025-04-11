@@ -3,7 +3,7 @@ import { FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 import UberProgressBar from "./ProgressBar";
 
 const LookingForDriver = ({ confirmRideData, image }) => {
-  console.log("confirmRideData=========", confirmRideData);
+  // console.log("confirmRideData=========", confirmRideData);
   return (
     <div className="max-w-sm bg-white text-center m-auto ">
       {/* Title */}

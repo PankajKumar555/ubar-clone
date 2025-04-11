@@ -34,7 +34,7 @@ export const Home = () => {
         {/* <!-- Driver Section --> */}
         <div
           className="flex flex-row justify-between items-center border-b pb-12 hover-effect cursor-pointer"
-          onClick={() => handleNavigate("caption-login")}
+          onClick={() => handleNavigate("captain-login")}
         >
           <h2 className="text-4xl font-bold">Driver</h2>
           <div className="arrow-wrapper text-4xl">

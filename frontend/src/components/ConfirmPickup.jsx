@@ -1,35 +1,64 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import LookingForDriver from "./LookingForDriver"; // Import your component
 import { endpoints, postData } from "../api/apiMethods";
 import RideConfirmed from "./RideConfirmed";
+import SocketContext from "../context/SocketContext";
 
 const ConfirmPickupDrawer = ({
   isOpen,
   closeModal,
   rideDetails,
-  timeAndDistance,
+  // timeAndDistance,
   pickup,
   dropoff,
   position,
   distance,
   duration,
 }) => {
-  console.log(
-    "-------",
-    timeAndDistance,
-    pickup,
-    dropoff,
-    rideDetails,
-    position,
-    distance,
-    duration
-  );
+  // console.log(
+  //   "-------",
+  //   timeAndDistance,
+  //   pickup,
+  //   dropoff,
+  //   rideDetails,
+  //   position,
+  //   distance,
+  //   duration
+  // );
   const [rideConfirmed, setRideConfirmed] = useState(false);
   const [lookingForRide, setLookingForRide] = useState(false);
   const [confirmRideData, setConfirmRideData] = useState();
   const token = localStorage.getItem("token");
-  console.log("ride confirmRideData", confirmRideData);
+  const { socket } = useContext(SocketContext);
+  // console.log("ride confirmRideData", confirmRideData);
+
+  const handleSendRquest = () => {
+    if (!socket || !socket.connected) {
+      console.error("❌ Socket is not connected, cannot send ride request.");
+      return;
+    }
+    console.log("ride socket", socket.connected);
+    const user = JSON.parse(localStorage.getItem("user")); // Get user data from localStorage
+    const pickup = { lat: position[0], lng: position[1] };
+    const destination = { lat: 28.534601, lng: 77.381182 }; // Assuming these are the locations you want to send
+    if (socket) {
+      socket.emit("request-ride", {
+        userId: user._id, // User ID from localStorage or context
+        pickupLocation: pickup, // { lat: ..., lng: ... }
+        destination: destination, // { lat: ..., lng: ... }
+      });
+
+      console.log(
+        "🚀 Ride request sent to backend!",
+        user._id,
+        pickup,
+        destination
+      );
+    } else {
+      console.error("❌ Socket not connected");
+    }
+  };
 
   const handleShowRideConfirmed = () => {
     const timeoutId = setTimeout(() => {
@@ -52,9 +81,10 @@ const ConfirmPickupDrawer = ({
     try {
       const responce = await postData(endpoints.createRide, payload, token);
       if (responce?.status == 201) {
-        setLookingForRide(true);
-        setConfirmRideData(responce?.data);
-        handleShowRideConfirmed();
+        handleSendRquest();
+        // setLookingForRide(true);
+        // setConfirmRideData(responce?.data);
+        // handleShowRideConfirmed();
       } else {
         console.log("Error while confirming Ride");
       }

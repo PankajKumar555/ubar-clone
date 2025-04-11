@@ -46,15 +46,16 @@ module.exports.getRoutes = async (coordinates) => {
   }
 };
 
-module.exports.getCaptionsInTheRadius = async (lat, lng, radius) => {
+module.exports.getCaptionsInTheRadius = async (lng, lat, radius) => {
   // radious in km
 
   const captions = await captionModel.find({
     location: {
       $geoWithin: {
-        $centerSphere: [[lat, lng], radius / 6371],
+        $centerSphere: [[lng, lat], radius / 6371],
       },
     },
+    // socketId: { $exists: true, $ne: null }, // Only online captains
   });
   return captions;
 };

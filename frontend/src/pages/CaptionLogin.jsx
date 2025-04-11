@@ -3,12 +3,14 @@ import NavbarHeader from "../components/NavbarHeader";
 import { useNavigate } from "react-router-dom";
 import { endpoints, postData } from "../api/apiMethods";
 import { toast } from "react-toastify";
+import SocketContext from "../context/SocketContext";
 
 export const CaptionLogin = () => {
   const [formData, setFormData] = React.useState({
     email: "",
     password: "",
   });
+  const { socket } = React.useContext(SocketContext); // Get socket from context
   const navigate = useNavigate();
   const handleNavigate = (path) => {
     navigate(`/${path}`);
@@ -24,8 +26,22 @@ export const CaptionLogin = () => {
     try {
       const responce = await postData(endpoints.loginCaption, formData);
       if (responce?.status === 200) {
-        toast.success("Login successfully! 🎉");
-        // navigate("/login");
+        // console.log("----captain", responce);
+        localStorage.setItem("token", responce?.data?.token);
+        localStorage.setItem(
+          "captain",
+          JSON.stringify(responce?.data?.captain)
+        ); // Store user data
+        // ✅ Send user details to the socket after login
+        if (socket) {
+          socket.emit("join", {
+            userId: responce?.data?.captain._id,
+            userType: "captain",
+          });
+        } else {
+          console.error("Socket not available");
+        }
+        navigate("/home-driver");
         setFormData({
           email: "",
           password: "",
@@ -144,7 +160,7 @@ export const CaptionLogin = () => {
           <button
             className="w-full flex items-center justify-center gap-2 p-3.5 rounded-lg text-md font-medium mb-4 cursor-pointer"
             style={{ background: "#eee" }}
-            onClick={() => handleNavigate("caption-signup")}
+            onClick={() => handleNavigate("captain-signup")}
           >
             <p className="text-sm text-gray-500">
               New to Uber? &nbsp;

@@ -22,7 +22,7 @@ module.exports.createCaption = async ({
   ) {
     throw new Error("All fields are required");
   }
-  const caption = captionModel.create({
+  const captain = captionModel.create({
     fullname: {
       firstname,
       lastname,
@@ -37,5 +37,5 @@ module.exports.createCaption = async ({
     },
   });
 
-  return caption;
+  return captain;
 };

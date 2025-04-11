@@ -12,12 +12,12 @@ module.exports.createRide = async (req, res) => {
   const { pickup, destination, vehicleType, distance, duration, lat, lng } =
     req.body;
   console.log(
-    "---backend",
-    pickup,
-    destination,
-    vehicleType,
-    distance,
-    duration,
+    "---backend-create",
+    // pickup,
+    // destination,
+    // vehicleType,
+    // distance,
+    // duration,
     lat,
     lng
   );
@@ -31,24 +31,29 @@ module.exports.createRide = async (req, res) => {
       distance,
       duration,
     });
-    res.status(201).json(ride);
+    res.status(201).json({
+      success: true,
+      message: "Ride created successfully",
+      ride,
+    });
     // const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
     const captionsInRadius = await mapService.getCaptionsInTheRadius(
       // pickupCoordinates.lat,
       // pickupCoordinates.ing,
-      lat,
-      lng,
-      2
+      28.5571,
+      77.1637,
+      10
     );
-    console.log("----<>>>>>", captionsInRadius);
+    console.log("🚕 Available captains:", captionsInRadius);
     ride.otp = "";
     const rideWithUser = await rideModel
       .findOne({ _id: ride._id })
       .populate("user");
-    captionsInRadius.map((caption) => {
-      sendMessageToSocketId(caption.socketId, {
+    // console.log("--->>>>>>rideusersearch", rideWithUser);
+    captionsInRadius.map((captain) => {
+      sendMessageToSocketId(captain.socketId, {
         event: "new-ride",
-        data: rideWithUser,
+        data: [rideWithUser],
       });
     });
   } catch (err) {

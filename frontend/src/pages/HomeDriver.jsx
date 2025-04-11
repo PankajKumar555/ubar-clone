@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, CircularProgress } from "@mui/material";
 // import { motion  from "framer-motion";
 import { motion as Motion } from "framer-motion";
@@ -18,6 +18,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import RideLists from "./RideLists";
 import UberProgressBar from "../components/ProgressBar";
+import SocketContext from "../context/SocketContext";
 
 const HomeDriver = () => {
   const [isOnline, setIsOnline] = useState(false);
@@ -25,10 +26,50 @@ const HomeDriver = () => {
   // const [rides, setRides] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isTripAccepted, setIsTripAccepted] = useState(false);
+  const [rideData, setRideData] = useState();
+  const { socket } = useContext(SocketContext); // Get socket from context
+
+  useEffect(() => {
+    if (!socket) return; // 🔒 Wait until socket is ready
+    const storedUser = localStorage.getItem("captain");
+    if (storedUser) {
+      const captain = JSON.parse(storedUser);
+      console.log("Socket connected home driver page:", socket, captain);
+      socket.emit("join", {
+        userId: captain._id,
+        userType: "captain",
+      });
+    }
+    // ✅ Set listener once
+    const handleNewRide = (rideData) => {
+      console.log("📲 New ride request received:", rideData);
+      setRideData(rideData);
+    };
+
+    socket.on("new-ride", handleNewRide);
+
+    // 🧼 Clean up to prevent duplicate listeners
+    return () => {
+      socket.off("new-ride", handleNewRide);
+    };
+  }, [socket]);
+
+  const handleShareLiveLocation = () => {
+    const storedUser = localStorage.getItem("captain");
+    if (storedUser && socket) {
+      const captain = JSON.parse(storedUser);
+      console.log("Socket connected home driver page:", socket, captain);
+      socket.emit("update-location-captain", {
+        userId: captain._id,
+        location: { ltd: 28.6448, lng: 77.216721 }, // Example location, replace with actual coordinates},
+      });
+    }
+  };
 
   const handleGoOnline = () => {
     setLoading(true);
     setIsOnline(true);
+    handleShareLiveLocation();
     setTimeout(() => {
       setLoading(false);
       setIsOpen(true);
@@ -153,7 +194,7 @@ const HomeDriver = () => {
           )}
         </div>
       )}
-      {isOpen && (
+      {rideData && (
         <Motion.div
           initial={{ y: "100%" }}
           animate={{ y: isOpen ? "0%" : "100%" }}
@@ -167,12 +208,13 @@ const HomeDriver = () => {
           {/* <h1 className="text-3xl font-semibold text-center mb-4">
           Nearby Rides
         </h1> */}
-          {Array.from({ length: 5 }).map((_, i) => (
+          {rideData?.map((item, i) => (
             <RideLists
               key={i}
               setIsOpen={() => {
                 setIsOpen(false), setIsTripAccepted(true);
               }}
+              rideData={item}
             />
           ))}
         </Motion.div>

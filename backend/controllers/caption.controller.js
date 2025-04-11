@@ -16,7 +16,7 @@ module.exports.registerCaption = async (req, res, next) => {
   }
   const hashedPassword = await captionModel.hashPassword(password);
 
-  const caption = await captionService.createCaption({
+  const captain = await captionService.createCaption({
     firstname: fullname.firstname,
     lastname: fullname.lastname,
     email,
@@ -27,8 +27,8 @@ module.exports.registerCaption = async (req, res, next) => {
     vehicleType: vehicle.vehicleType,
   });
 
-  const token = caption.generateAuthToken();
-  res.status(201).json({ token, caption });
+  const token = captain.generateAuthToken();
+  res.status(201).json({ token, captain });
 };
 
 module.exports.loginCaption = async (req, res, next) => {
@@ -38,23 +38,23 @@ module.exports.loginCaption = async (req, res, next) => {
   }
   const { email, password } = req.body;
 
-  const caption = await captionModel.findOne({ email }).select("+password");
-  if (!caption) {
+  const captain = await captionModel.findOne({ email }).select("+password");
+  if (!captain) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
 
-  const isMatch = await caption.comparePassword(password);
+  const isMatch = await captain.comparePassword(password);
   if (!isMatch) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
-  const token = caption.generateAuthToken();
+  const token = captain.generateAuthToken();
   res.cookie("token", token);
-  res.status(200).json({ token, caption });
+  res.status(200).json({ token, captain });
 };
 
 module.exports.getCaptionProfile = async (req, res, next) => {
-  res.status(200).json({ caption: req.caption });
+  res.status(200).json({ captain: req.captain });
 };
 
 module.exports.logoutCaption = async (req, res, next) => {
