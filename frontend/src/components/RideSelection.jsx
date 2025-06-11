@@ -112,14 +112,19 @@ const RideSelection = ({
         <button
           className="w-full bg-black text-white p-3 rounded-lg text-md font-medium cursor-pointer mt-2"
           onClick={() => setConfirmDialog(true)}
-          // disabled={!confirmDialog}
+          disabled={!selectedRide}
         >
           Choose Ubar {name}
         </button>
       </div>
       <ConfirmPickupDialog
         isOpen={confirmDialog}
-        closeModal={() => setConfirmDialog(false)}
+        closeModal={() => {
+          setConfirmDialog(false),
+            setname(),
+            setRideDetails(),
+            setSelectedRide();
+        }}
         rideDetails={rideDetails}
         pickup={pickup}
         dropoff={dropoff}

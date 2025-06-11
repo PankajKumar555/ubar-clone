@@ -51,7 +51,7 @@ const RideLists = ({ setIsOpen, rideData }) => {
         variant="contained"
         color="primary"
         sx={{ width: "100%", textTransform: "capitalize", marginTop: "0.5rem" }}
-        onClick={setIsOpen}
+        onClick={() => setIsOpen(rideData?._id)}
       >
         Confirm
       </Button>

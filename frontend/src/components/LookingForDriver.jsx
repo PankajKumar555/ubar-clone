@@ -3,7 +3,7 @@ import { FaMapMarkerAlt, FaMoneyBillWave } from "react-icons/fa";
 import UberProgressBar from "./ProgressBar";
 
 const LookingForDriver = ({ confirmRideData, image }) => {
-  // console.log("confirmRideData=========", confirmRideData);
+  console.log("confirmRideData=========", confirmRideData);
   return (
     <div className="max-w-sm bg-white text-center m-auto ">
       {/* Title */}
@@ -13,7 +13,7 @@ const LookingForDriver = ({ confirmRideData, image }) => {
       {/* Car Image */}
       <img
         src={image} // Replace with actual image URL
-        alt={confirmRideData?.vehicleType}
+        alt={confirmRideData?.ride?.vehicleType}
         className="mx-auto w-35"
       />
 
@@ -21,9 +21,11 @@ const LookingForDriver = ({ confirmRideData, image }) => {
       <div className="flex items-center gap-2 border-b border-gray-400 py-2">
         <FaMapMarkerAlt className="text-gray-600 mr-2" />
         <div>
-          <p className="font-semibold text-start">{confirmRideData?.pickup}</p>
+          <p className="font-semibold text-start">
+            {confirmRideData?.ride?.pickup}
+          </p>
           <p className="text-sm text-gray-500 text-start">
-            {confirmRideData?.pickup}
+            {confirmRideData?.ride?.pickup}
           </p>
         </div>
       </div>
@@ -33,10 +35,10 @@ const LookingForDriver = ({ confirmRideData, image }) => {
         <FaMapMarkerAlt className="text-gray-600 mr-2" />
         <div>
           <p className="font-semibold text-start">
-            {confirmRideData?.destination}
+            {confirmRideData?.ride?.destination}
           </p>
           <p className="text-sm text-gray-500 text-start">
-            {confirmRideData?.destination}
+            {confirmRideData?.ride?.destination}
           </p>
         </div>
       </div>
@@ -46,7 +48,7 @@ const LookingForDriver = ({ confirmRideData, image }) => {
         <FaMoneyBillWave className="text-gray-600 mr-2" />
         <div>
           <p className="font-semibold text-lg text-start">
-            ₹{confirmRideData?.fare}
+            ₹{confirmRideData?.ride?.fare}
           </p>
           <p className="text-sm text-gray-500 text-start">Cash</p>
         </div>

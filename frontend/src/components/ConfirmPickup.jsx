@@ -16,16 +16,16 @@ const ConfirmPickupDrawer = ({
   distance,
   duration,
 }) => {
-  // console.log(
-  //   "-------",
-  //   timeAndDistance,
-  //   pickup,
-  //   dropoff,
-  //   rideDetails,
-  //   position,
-  //   distance,
-  //   duration
-  // );
+  console.log(
+    "-------pickup customer",
+    // timeAndDistance,
+    pickup,
+    dropoff,
+    rideDetails,
+    position,
+    distance,
+    duration
+  );
   const [rideConfirmed, setRideConfirmed] = useState(false);
   const [lookingForRide, setLookingForRide] = useState(false);
   const [confirmRideData, setConfirmRideData] = useState();
@@ -49,12 +49,12 @@ const ConfirmPickupDrawer = ({
         destination: destination, // { lat: ..., lng: ... }
       });
 
-      console.log(
-        "🚀 Ride request sent to backend!",
-        user._id,
-        pickup,
-        destination
-      );
+      // console.log(
+      //   "🚀 Ride request sent to backend!",
+      //   user._id,
+      //   pickup,
+      //   destination
+      // );
     } else {
       console.error("❌ Socket not connected");
     }
@@ -82,8 +82,8 @@ const ConfirmPickupDrawer = ({
       const responce = await postData(endpoints.createRide, payload, token);
       if (responce?.status == 201) {
         handleSendRquest();
-        // setLookingForRide(true);
-        // setConfirmRideData(responce?.data);
+        setLookingForRide(true);
+        setConfirmRideData(responce?.data);
         // handleShowRideConfirmed();
       } else {
         console.log("Error while confirming Ride");

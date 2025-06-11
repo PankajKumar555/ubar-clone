@@ -11,6 +11,7 @@ import {
   TileLayer,
   Marker,
   Popup,
+  useMap,
   //   useMap,
   //   Polyline,
 } from "react-leaflet";
@@ -19,6 +20,8 @@ import L from "leaflet";
 import RideLists from "./RideLists";
 import UberProgressBar from "../components/ProgressBar";
 import SocketContext from "../context/SocketContext";
+import { endpoints, fetchData } from "../api/apiMethods";
+import AdjustViewMap from "../components/AdjustViewMap";
 
 const HomeDriver = () => {
   const [isOnline, setIsOnline] = useState(false);
@@ -26,8 +29,15 @@ const HomeDriver = () => {
   // const [rides, setRides] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isTripAccepted, setIsTripAccepted] = useState(false);
-  const [rideData, setRideData] = useState();
+  const [rideData, setRideData] = useState([]);
   const { socket } = useContext(SocketContext); // Get socket from context
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [mapBounds, setMapBounds] = useState([]);
+  const [dropOffCoords, setDropOffCoords] = useState(null);
+
+  const token = localStorage.getItem("token");
+
+  console.log("📲 New ride request received:", rideData);
 
   useEffect(() => {
     if (!socket) return; // 🔒 Wait until socket is ready
@@ -41,16 +51,15 @@ const HomeDriver = () => {
       });
     }
     // ✅ Set listener once
-    const handleNewRide = (rideData) => {
-      console.log("📲 New ride request received:", rideData);
-      setRideData(rideData);
+    const handleNewRide = (newRide) => {
+      setRideData((prev) => [...prev, newRide[0]]);
     };
 
-    socket.on("new-ride", handleNewRide);
+    socket.on("request-ride", handleNewRide);
 
     // 🧼 Clean up to prevent duplicate listeners
     return () => {
-      socket.off("new-ride", handleNewRide);
+      socket.off("request-ride", handleNewRide);
     };
   }, [socket]);
 
@@ -73,21 +82,66 @@ const HomeDriver = () => {
     setTimeout(() => {
       setLoading(false);
       setIsOpen(true);
-      // setRides([
-      //   {
-      //     id: 1,
-      //     pickup: "Lane Number 3, Wadgaon Sheri",
-      //     dropoff: "Hinjawadi, Pune",
-      //     time: "3 mins away",
-      //   },
-      //   {
-      //     id: 2,
-      //     pickup: "MG Road, Pune",
-      //     dropoff: "Shivajinagar",
-      //     time: "5 mins away",
-      //   },
-      // ]);
     }, 5000);
+  };
+
+  const handleAcceptRide = (acceptedRideId) => {
+    setRideData((prevRides) =>
+      prevRides.filter((ride) => ride._id !== acceptedRideId)
+    );
+    setIsOpen(false);
+    setIsTripAccepted(true);
+    handleFindRoute();
+    setDropOffCoords();
+  };
+
+  const handleFindRoute = async () => {
+    if (!position || !dropOffCoords) return;
+    // {
+    //   console.log(position, dropOffCoords);
+    // }
+
+    try {
+      // const response = await getRoute(position, dropOffCoords);
+      const response = await fetchData(
+        `${endpoints.getDistanceTime}?pickup=${encodeURIComponent(
+          position
+        )}&dropoff=${encodeURIComponent(dropOffCoords)}`,
+        token
+      );
+      if (response?.data?.features[0]?.geometry?.coordinates) {
+        const routePoints =
+          response?.data?.features[0]?.geometry?.coordinates.map(
+            ([lng, lat]) => [lat, lng]
+          );
+        setRouteCoordinates(routePoints);
+        setMapBounds([position, dropOffCoords]); // Save bounds to state
+        // getFare(response);
+        // setTimeAndDistance([
+        //   (
+        //     (response?.data?.features[0]?.properties?.segments[0]?.distance ??
+        //       0) / 1000
+        //   ).toFixed(2),
+        //   (
+        //     (response?.data?.features[0]?.properties?.segments[0]?.duration ??
+        //       0) / 60
+        //   ).toFixed(2),
+        // ]);
+      }
+      // setDropoffSuggestions(response || []);
+    } catch (error) {
+      console.error("Error fetching dropoff suggestions:", error);
+    }
+  };
+
+  const RecenterMap = ({ position }) => {
+    const map = useMap();
+    useEffect(() => {
+      if (position) {
+        map.setView(position, 15); // Set map center to user's location
+      }
+    }, [position, map]);
+    return null;
   };
 
   const position = [28.6139, 77.209];
@@ -103,8 +157,8 @@ const HomeDriver = () => {
             className="w-full h-full"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {/* <RecenterMap position={position} /> */}
-            {/* <AdjustViewMap bounds={mapBounds} /> */}
+            <RecenterMap position={position} />
+            <AdjustViewMap bounds={mapBounds} />
             {/* Show user location marker */}
             {position && (
               <Marker
@@ -120,37 +174,37 @@ const HomeDriver = () => {
             )}
 
             {/* Draw route polyline */}
-            {/* {routeCoordinates?.length > 0 && (
-                      <Polyline positions={routeCoordinates} color="blue" weight={5} />
-                    )} */}
+            {routeCoordinates?.length > 0 && (
+              <Polyline positions={routeCoordinates} color="blue" weight={5} />
+            )}
 
             {/* Show pickup location marker */}
-            {/* {position && (
-                      <Marker
-                        position={position}
-                        icon={L.icon({
-                          iconUrl:
-                            "https://cdn-icons-png.flaticon.com/512/684/684947.png", // Online pickup icon
-                          iconSize: [30, 30],
-                        })}
-                      >
-                        <Popup>Pickup Location</Popup>
-                      </Marker>
-                    )} */}
+            {position && (
+              <Marker
+                position={position}
+                icon={L.icon({
+                  iconUrl:
+                    "https://cdn-icons-png.flaticon.com/512/684/684947.png", // Online pickup icon
+                  iconSize: [30, 30],
+                })}
+              >
+                <Popup>Pickup Location</Popup>
+              </Marker>
+            )}
 
             {/* Show dropoff location marker */}
-            {/* {dropOffCoords && (
-                      <Marker
-                        position={dropOffCoords}
-                        icon={L.icon({
-                          iconUrl:
-                            "https://cdn-icons-png.flaticon.com/512/535/535137.png", // Online dropoff icon
-                          iconSize: [30, 30],
-                        })}
-                      >
-                        <Popup>Dropoff Location</Popup>
-                      </Marker>
-                    )} */}
+            {dropOffCoords && (
+              <Marker
+                position={dropOffCoords}
+                icon={L.icon({
+                  iconUrl:
+                    "https://cdn-icons-png.flaticon.com/512/535/535137.png", // Online dropoff icon
+                  iconSize: [30, 30],
+                })}
+              >
+                <Popup>Dropoff Location</Popup>
+              </Marker>
+            )}
           </MapContainer>
         </div>
       </div>
@@ -211,9 +265,7 @@ const HomeDriver = () => {
           {rideData?.map((item, i) => (
             <RideLists
               key={i}
-              setIsOpen={() => {
-                setIsOpen(false), setIsTripAccepted(true);
-              }}
+              setIsOpen={(id) => handleAcceptRide(id)}
               rideData={item}
             />
           ))}
